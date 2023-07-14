@@ -1,0 +1,21 @@
+version: '3'
+services:
+  curl-busybox:
+    container_name: curl-busybox
+    image: curlimages/curl:latest
+    entrypoint: [ "tail", "-f", "/dev/null" ]
+    volumes:
+      - ./certs/client.crt:/home/curl_user/client.crt
+      - ./certs/client.key:/home/curl_user/client.key
+  mtls-nginx:
+    container_name: test.localdev.me
+    image: nginx:1.25
+    ports:
+      - "8443:433"
+      - "8080:80"
+    volumes:
+      - ./conf/nginx-setup-mtls.conf:/etc/nginx/conf.d/default.conf
+      - ./certs/server.crt:/etc/nginx/certs/server.crt
+      - ./certs/server.key:/etc/nginx/certs/server.key
+      - ./certs/ca.crt:/etc/nginx/mtls/ca.crt
+

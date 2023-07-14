@@ -1,0 +1,10 @@
+*.crt
+*.key
+*.csr
+*.ldf
+*.ndf
+*.mdf
+*.bin
+log/
+.env
+secrets/
