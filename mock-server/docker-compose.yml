@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  mockserver:
+      container_name: mock-server
+      image: mockserver/mockserver:5.15.0
+      ports:
+        - 1080:1080
+      environment:
+        MOCKSERVER_PROPERTY_FILE: /config/mockserver.properties
+      volumes:
+        - type: bind
+          source: ./config
+          target: /config
