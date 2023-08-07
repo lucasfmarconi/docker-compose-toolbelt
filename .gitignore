@@ -8,3 +8,5 @@
 log/
 .env
 secrets/
+__pycache__*
+locust/locustfile.py
