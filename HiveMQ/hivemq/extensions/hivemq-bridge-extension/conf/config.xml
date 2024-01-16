@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hivemq-bridge-extension xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+    <bridges>
+        <bridge>
+            <name>test-bridge</name>
+            <remote-broker>
+                <connection>
+                    <static>
+                        <host>emqx</host>
+                        <port>1883</port>
+                    </static>
+                </connection>
+            </remote-broker>
+            <topics>
+                <topic>
+                    <filter>client/+/status</filter>
+                    <mode>PUB</mode>
+                    <destination>tp/product/saopaulo/laminator/client</destination>
+                    <preserve-retained>true</preserve-retained>
+                </topic>
+            </topics>
+            <topics>
+                <topic>
+                    <filter>tp/product/saopaulo/laminator/machine/data</filter>
+                    <mode>SUB</mode>
+                    <destination>tp/product/singapore/laminator/machine/data</destination>
+                    <preserve-retained>true</preserve-retained>
+                </topic>
+            </topics>
+        </bridge>
+    </bridges>
+</hivemq-bridge-extension>

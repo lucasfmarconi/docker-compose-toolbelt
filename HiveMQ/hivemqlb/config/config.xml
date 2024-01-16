@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+
+    <listeners>
+        <tcp-listener>
+            <port>1883</port>
+            <bind-address>0.0.0.0</bind-address>
+        </tcp-listener>
+        <websocket-listener>
+            <port>8000</port>
+            <bind-address>0.0.0.0</bind-address>
+            <path>/mqtt</path>
+            <name>websocket-listener</name>
+            <subprotocols>
+                <subprotocol>mqttv3.1</subprotocol>
+                <subprotocol>mqtt</subprotocol>
+            </subprotocols>
+            <allow-extensions>true</allow-extensions>
+        </websocket-listener>
+    </listeners>
+
+    <!--REST-API-CONFIGURATION-->
+    <control-center>
+        <listeners>
+            <http>
+                <port>8080</port>
+                <bind-address>0.0.0.0</bind-address>
+            </http>
+        </listeners>
+    </control-center>
+
+    <!-- Health API CONFIGURATION-->
+    <health-api>
+        <enabled>true</enabled>
+        <listeners>
+            <http>
+                <port>8889</port>
+                <name>health-api-listener</name>
+                <bind-address>0.0.0.0</bind-address>
+            </http>
+        </listeners>
+    </health-api>
+
+    <!-- Cluster Configuration -->
+    <cluster>
+        <enabled>true</enabled>
+        <transport>
+            <tcp>
+                <bind-address>0.0.0.0</bind-address>
+                <bind-port>7800</bind-port>
+            </tcp>
+        </transport>
+        <discovery>
+            <static>
+                <node>
+                    <host>172.31.0.101</host>
+                    <port>7800</port>
+                </node>
+                <node>
+                    <host>172.31.0.102</host>
+                    <port>7800</port>
+                </node>
+                <node>
+                    <host>172.31.0.103</host>
+                    <port>7800</port>
+                </node>
+            </static>
+        </discovery>
+    </cluster>
+
+</hivemq>

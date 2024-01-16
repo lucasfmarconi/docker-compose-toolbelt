@@ -1,0 +1,74 @@
+version: "3.8"
+services:
+  hivemq-node1:
+    image: hivemq/hivemq4:4.23.0
+    networks:
+      hiveMQ.net:
+        ipv4_address: "172.31.0.101"
+    volumes:
+      - ./hivemqlb/config:/opt/hivemq/conf  # Map configuration directory
+      - ./hivemq/extensions/hivemq-bridge-extension/conf/config.xml:/opt/hivemq/extensions/hivemq-bridge-extension/conf/config.xml  # Bridge extension config
+    environment:
+      HIVEMQ_ALLOW_ANONYMOUS: "true"  # Allow anonymous connections (optional)
+    ports:
+      - 8080:8080
+
+  hivemq-node2:
+    image: hivemq/hivemq4:4.23.0
+    networks:
+      hiveMQ.net:
+        ipv4_address: "172.31.0.102"
+    volumes:
+      - ./hivemqlb/config:/opt/hivemq/conf  # Map configuration directory
+      - ./hivemq/extensions/hivemq-bridge-extension/conf/config.xml:/opt/hivemq/extensions/hivemq-bridge-extension/conf/config.xml  # Bridge extension config
+    environment:
+      HIVEMQ_ALLOW_ANONYMOUS: "true"  # Allow anonymous connections (optional)
+    depends_on:
+      - hivemq-node1
+
+  hivemq-node3:
+    image: hivemq/hivemq4:4.23.0
+    networks:
+      hiveMQ.net:
+        ipv4_address: "172.31.0.103"
+    volumes:
+      - ./hivemqlb/config:/opt/hivemq/conf  # Map configuration directory
+      - ./hivemq/extensions/hivemq-bridge-extension/conf/config.xml:/opt/hivemq/extensions/hivemq-bridge-extension/conf/config.xml  # Bridge extension config
+    environment:
+      HIVEMQ_ALLOW_ANONYMOUS: "true"  # Allow anonymous connections (optional)
+    depends_on:
+      - hivemq-node1
+  
+  haproxy-lb:
+    image: haproxytech/haproxy-alpine:2.9.1
+    networks:
+      - hiveMQ.net
+    volumes:
+       - "./haproxy/:/usr/local/etc/haproxy:ro"
+    ports:
+       - "1883:1883"
+       - "8889:8889"
+       - "8404:8404"
+    depends_on:
+      - hivemq-node1
+      - hivemq-node2
+      - hivemq-node3
+
+  mqttx-cli:
+    container_name: mqttx.cli
+    restart: unless-stopped
+    env_file: .env
+    build:
+      context: ./mqttx
+    networks:
+      - hiveMQ.net
+    depends_on:
+      - haproxy-lb
+
+networks:
+  hiveMQ.net:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.31.0.0/24
+         gateway: 172.31.0.1

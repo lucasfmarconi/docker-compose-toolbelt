@@ -1,0 +1,49 @@
+version: "3.8"  # Specify Docker Compose version
+
+services:
+  hivemq:
+    image: hivemq/hivemq4
+    container_name: hivemq
+    ports:
+      - "1883:1883"  # MQTT port
+      - "8080:8080"  # Web UI (optional)
+      - "8000:8000"  # Web Socket (optional)
+      - "8889:8889"  # Health API (optional)
+    volumes:
+      - ./hivemqbridge/config:/opt/hivemq/conf  # Map configuration directory
+      - ./hivemqbridge/extensions/hivemq-bridge-extension/conf/config.xml:/opt/hivemq/extensions/hivemq-bridge-extension/conf/config.xml  # Bridge extension config
+      - ./license:/opt/hivemq/license  # License
+    environment:
+      HIVEMQ_ALLOW_ANONYMOUS: "true"  # Allow anonymous connections (optional)
+      HIVEMQ_LOG_LEVEL: "TRACE"  # Set log level (optional)
+    networks:
+      - hiveMQ.net
+    deploy:
+      resources:
+        limits:
+          cpus: "12"
+
+  # hivemq-co-worker:
+  #   image: hivemq/hivemq4
+  #   container_name: hivemq-co-worker
+  #   ports:
+  #     - "1983:1883"  # MQTT port
+  #     - "9090:8080"  # Web UI (optional)
+  #     - "9900:8000"  # Web Socket (optional)
+  #     - "9989:8889"  # Health API (optional)
+  #   volumes:
+  #     - ./hivemqbridge/config:/opt/hivemq/conf  # Map configuration directory
+  #     - ./license:/opt/hivemq/license  # License
+  #   environment:
+  #     HIVEMQ_ALLOW_ANONYMOUS: "true"  # Allow anonymous connections (optional)
+  #     HIVEMQ_LOG_LEVEL: "TRACE"  # Set log level (optional)
+  #   networks:
+  #     - hiveMQ.net
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "12"
+
+networks:
+  hiveMQ.net:
+    driver: bridge

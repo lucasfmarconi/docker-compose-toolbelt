@@ -1,0 +1,111 @@
+version: "3.8"  # Specify Docker Compose version
+
+services:
+  hivemq:
+    image: hivemq/hivemq4
+    container_name: hivemq
+    ports:
+      - "1883:1883"  # MQTT port
+      - "8080:8080"  # Web UI (optional)
+      - "8000:8000"  # Web Socket (optional)
+      - "8889:8889"  # Health API (optional)
+    volumes:
+      - ./hivemq/config:/opt/hivemq/conf  # Map configuration directory
+      - ./hivemq/extensions/hivemq-bridge-extension/conf/config.xml:/opt/hivemq/extensions/hivemq-bridge-extension/conf/config.xml  # Bridge extension config
+      - ./license:/opt/hivemq/license  # License
+    environment:
+      HIVEMQ_ALLOW_ANONYMOUS: "true"  # Allow anonymous connections (optional)
+      HIVEMQ_LOG_LEVEL: "TRACE"  # Set log level (optional)
+    networks:
+      - hiveMQ.net
+    deploy:
+      resources:
+        limits:
+          cpus: "3"
+
+  hivemq-worker:
+    image: hivemq/hivemq4
+    container_name: hivemq-worker
+    ports:
+      - "1893:1883"  # MQTT port
+      - "8090:8080"  # Web UI (optional)
+      - "8900:8000"  # Web Socket (optional)
+      - "8899:8889"  # Health API (optional)
+    volumes:
+      - ./hivemq/config:/opt/hivemq/conf  # Map configuration directory
+      - ./license:/opt/hivemq/license  # License
+    environment:
+      HIVEMQ_ALLOW_ANONYMOUS: "true"  # Allow anonymous connections (optional)
+      HIVEMQ_LOG_LEVEL: "TRACE"  # Set log level (optional)
+    depends_on:
+      - hivemq
+    networks:
+      - hiveMQ.net
+    deploy:
+      resources:
+        limits:
+          cpus: "3"
+
+  hivemq-co-worker:
+    image: hivemq/hivemq4
+    container_name: hivemq-co-worker
+    ports:
+      - "1983:1883"  # MQTT port
+      - "9090:8080"  # Web UI (optional)
+      - "9900:8000"  # Web Socket (optional)
+      - "9989:8889"  # Health API (optional)
+    volumes:
+      - ./hivemq/config:/opt/hivemq/conf  # Map configuration directory
+      - ./license:/opt/hivemq/license  # License
+    environment:
+      HIVEMQ_ALLOW_ANONYMOUS: "true"  # Allow anonymous connections (optional)
+      HIVEMQ_LOG_LEVEL: "TRACE"  # Set log level (optional)
+    depends_on:
+      - hivemq
+      - hivemq-worker
+    networks:
+      - hiveMQ.net
+    deploy:
+      resources:
+        limits:
+          cpus: "3"
+
+  hivemq-co-worker-outdated:
+    image: hivemq/hivemq4:4.9.15
+    container_name: hivemq-co-worker-outdated
+    ports:
+      - "9983:1883"  # MQTT port
+      - "9999:8080"  # Web UI (optional)
+      - "8999:8000"  # Web Socket (optional)
+      - "9888:8889"  # Health API (optional)
+    volumes:
+      - ./hivemq/config:/opt/hivemq/conf  # Map configuration directory
+      - ./license:/opt/hivemq/license  # License
+    environment:
+      HIVEMQ_ALLOW_ANONYMOUS: "true"  # Allow anonymous connections (optional)
+      HIVEMQ_LOG_LEVEL: "TRACE"  # Set log level (optional)
+    depends_on:
+      - hivemq
+      - hivemq-worker
+      - hivemq-co-worker
+    networks:
+      - hiveMQ.net
+    deploy:
+      resources:
+        limits:
+          cpus: "3"
+
+  mqttx-cli:
+    container_name: mqttx.cli
+    restart: unless-stopped
+    env_file: .env
+    build:
+      context: ./mqttx
+    depends_on:
+      - hivemq
+    networks:
+      - hiveMQ.net
+
+networks:
+  hiveMQ.net:
+    driver: bridge
